@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, DM_Sans, } from "next/font/google";
 import "./globals.css";
+import Header from "@/components/Header";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700","800", "900", "1000"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-dm-sans"
 })
 
@@ -26,10 +27,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${dmSans.variable} ${bricolage.variable} antialiased`}
-      >
-        {children}
+      <body className={`${dmSans.variable} ${bricolage.variable} antialiased min-h-screen bg-neutral-900 text-neutral-50`}>
+        <Header />
+        <main>{children}</main>
       </body>
     </html>
   );
