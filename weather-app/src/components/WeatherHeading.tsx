@@ -1,4 +1,5 @@
 "use client"
+import axios from "axios"
 import { useEffect, useState } from "react"
 
 const fallbackMessages = [
@@ -13,20 +14,20 @@ export default function WeatherHeading() {
   const [message, setMessage] = useState("")
 
   useEffect(() => {
-    // Pick a random fallback message first
+    // Pick a random fallback first
     const random = Math.floor(Math.random() * fallbackMessages.length)
     setMessage(fallbackMessages[random])
 
-    // Try fetching an AI-generated one
-    fetch("/lib/api/weather-heading")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.message) {
-          setMessage(data.message)
+    // Fetch AI message
+    axios
+      .get("../api/weather-heading/route.ts") // ✅ ensure correct route
+      .then((res) => {
+        if (res.data?.message) {
+          setMessage(res.data.message)
         }
       })
       .catch(() => {
-        // Fail silently, fallback already in place
+        // Fail silently → fallback already set
       })
   }, [])
 
