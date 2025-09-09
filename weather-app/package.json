@@ -1,0 +1,46 @@
+{
+  "name": "weather-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Frontend Mentors 30 days Hackathon challenge",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mide2020-16/FM-Weather-App.git"
+  },
+  "keywords": [
+    "hackathon",
+    "30-days-challenge",
+    "frontend-mentors",
+    "weather",
+    "forecast"
+  ],
+  "author": "Efuwape Ayomide",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mide2020-16/FM-Weather-App/issues"
+  },
+  "dependencies": {
+    "next": "15.5.2",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.2",
+    "tailwindcss": "^4.1.13",
+    "typescript": "^5"
+  },
+  "homepage": "https://github.com/mide2020-16/FM-Weather-App#readme"
+}
