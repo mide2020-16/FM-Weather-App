@@ -19,7 +19,7 @@ export async function GET() {
     })
 
     // Extract text safely
-    const heading = res.output[0]?.id || "How's the sky looking today?"
+    const heading = res.output[0].type || "How's the sky looking today?"
 
     return NextResponse.json({ heading })
   } catch (error) {
