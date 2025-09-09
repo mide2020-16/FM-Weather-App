@@ -24,7 +24,7 @@ export default function UnitsDropdown () {
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 top-10 mt-2 w-60 rounded-md bg-neutral-800 border border-amber-100 shadow-lg">
+              <div className="absolute right-0 top-10 mt-2 w-60 rounded-md bg-neutral-800 border border-amber-100 -lg">
                 <div className="px-4 py-3 font-sans text-sm text-neutral-200 space-y-3">
 
                   <button onClick={() => setIsImperial(!isImperial)} className="font-semibold">

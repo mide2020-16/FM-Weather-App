@@ -14,6 +14,9 @@ const config: Config = {
           800: "#262540",
           900: "#02012C",
         },
+        blue: {
+          500: "#4658D9"
+        }
       },
       fontFamily: {
         sans: ["var(--font-dm-sans)", "sans-serif"],

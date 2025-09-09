@@ -5,3 +5,6 @@
   --foreground: #171717;
 }
 
+.bgImage {
+  background-image: url('../app/bg-today-large.svg');
+}
