@@ -5,15 +5,14 @@ import DailyForecast from "@/components/DailyForecast";
 import HourlyForecast from "@/components/HourlyForecast";
 import SearchBar from "@/components/SearchBar";
 import WeatherCard from "@/components/WeatherCard";
+import WeatherHeading from "@/components/WeatherHeading";
 import { useState } from "react";
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   return (
     <div className="flex flex-col items-center w-full px-4 mt-10">
-      <h1 className="font-extrabold font-display text-3xl sm:text-4xl text-center mb-6">
-        How&apos;s the sky looking today?
-      </h1>
+      <WeatherHeading />
       <SearchBar />
       <div className="flex flex-col lg:flex-row gap-6 w-full max-w-6xl">
         <div className="flex flex-col gap-6 flex-1">

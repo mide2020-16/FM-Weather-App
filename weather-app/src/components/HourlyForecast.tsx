@@ -4,15 +4,16 @@ import Image from "next/image"
 import { useState } from "react"
 
 export default function HourlyForecast({ loading }: isLoadingProps) {
-  const hourData = [
-    { icon: "icon-rain.webp", time: "3PM", deg: "20" },
-    { icon: "icon-fog.webp", time: "4PM", deg: "21" },
-    { icon: "icon-snow.webp", time: "5PM", deg: "19" },
-    { icon: "icon-sunny.webp", time: "6PM", deg: "18" },
-    { icon: "icon-overcast.webp", time: "7PM", deg: "17" },
-    { icon: "icon-sunny.webp", time: "6PM", deg: "18" },
-    { icon: "icon-overcast.webp", time: "7PM", deg: "17" },
-  ]
+    const hourData = [
+        { icon: "icon-rain.webp", time: "3PM", deg: "20" },
+        { icon: "icon-fog.webp", time: "4PM", deg: "21" },
+        { icon: "icon-snow.webp", time: "5PM", deg: "19" },
+        { icon: "icon-sunny.webp", time: "6PM", deg: "18" },
+        { icon: "icon-overcast.webp", time: "7PM", deg: "17" },
+        { icon: "icon-sunny.webp", time: "6PM", deg: "18" },
+        { icon: "icon-overcast.webp", time: "7PM", deg: "17" },
+        { icon: "icon-sunny.webp", time: "6PM", deg: "18" },  
+    ]
 
   const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
 
@@ -52,7 +53,7 @@ export default function HourlyForecast({ loading }: isLoadingProps) {
       </div>
 
       {/* Forecast List */}
-      <div className="flex flex-col gap-3 overflow-y-auto max-h-[60vh] pr-2 scrollbar-thin scrollbar-thumb-neutral-700">
+      <div className="flex flex-col gap-3 overflow-y-auto max-h-[100vh] pr-2 scrollbar-thin scrollbar-thumb-neutral-700">
         {loading
           ? Array.from({ length: 7 }).map((_, i) => (
               <div

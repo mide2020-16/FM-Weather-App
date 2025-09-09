@@ -4,7 +4,7 @@ export default function WeatherCard({ loading }: isLoadingProps) {
   return (
     <div
       className={`rounded-lg p-6 text-center transition-colors duration-300 w-full h-64 flex items-center justify-center ${
-        loading ? "bg-neutral-800" : "bgImage bg-cover bg-center"
+        loading ? "bg-neutral-800" : "bgSmall lg:bgImage bg-cover bg-center"
       }`}
     >
       {loading ? (

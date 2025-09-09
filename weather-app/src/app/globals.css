@@ -8,3 +8,6 @@
 .bgImage {
   background-image: url('../app/bg-today-large.svg');
 }
+.bgSmall {
+  background-image: url('../app/bg-today-small.svg');
+}
