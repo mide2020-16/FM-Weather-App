@@ -1,0 +1,16 @@
+{
+    "folders": [
+        {
+            "path": ".."
+        },
+        {
+            "path": "../../../Documents/weather-app-main/assets"
+        },
+        {
+            "path": "../../../Documents/weather-app-main/design"
+        }
+    ],
+    "settings": {
+        "postman.settings.dotenv-detection-notification-visibility": false
+    }
+}

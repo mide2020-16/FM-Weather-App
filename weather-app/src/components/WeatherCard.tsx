@@ -1,28 +1,213 @@
-import isLoadingProps from "@/types/isLoading"
+'use client'
 
-export default function WeatherCard({ loading }: isLoadingProps) {
+import { RadioIcon, Star, X } from "lucide-react";
+import Image from "next/image";
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import AnimatedNumberVanilla from "./AnimateNumber";
+
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
+
+const WEATHER_ANIMATIONS: Record<string, string> = {
+  thunderstorm: "https://assets10.lottiefiles.com/packages/lf20_jm7mv1ib.json",
+  rain:         "https://assets10.lottiefiles.com/packages/lf20_t24tpvcu.json",
+  snow:         "https://assets10.lottiefiles.com/packages/lf20_2cwDXD.json",
+  mist:         "https://assets10.lottiefiles.com/packages/lf20_SkHScC.json",
+  clear:        "https://assets10.lottiefiles.com/packages/lf20_UJNc2t.json",
+  clouds:       "https://assets10.lottiefiles.com/packages/lf20_jpkclziu.json",
+};
+
+function getAnimationKey(condition: string): string {
+  const c = condition.toLowerCase();
+  if (c.includes("thunder")) return "thunderstorm";
+  if (c.includes("drizzle") || c.includes("rain")) return "rain";
+  if (c.includes("snow"))    return "snow";
+  if (c.includes("mist") || c.includes("fog") || c.includes("haze")) return "mist";
+  if (c.includes("clear"))   return "clear";
+  if (c.includes("cloud"))   return "clouds";
+  return "clear";
+}
+
+export interface WeatherData {
+  city: string;
+  country: string;
+  condition: string;
+  description: string;
+  temp: number;
+  feelsLike: number;
+  humidity: number;
+  windSpeed: number;
+  icon: string;
+  advisory: string;
+}
+
+interface WeatherCardProps {
+  loading: boolean;
+  weatherData: WeatherData | null;
+}
+
+export default function WeatherCard({ loading, weatherData }: WeatherCardProps) {
+  const [favorite, setFavorite] = useState(false);
+  const [isRadarOpen, setIsRadarOpen] = useState(false);
+  const [animationData, setAnimationData] = useState<object | null>(null);
+
+  const formattedDate = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  // Fetch Lottie JSON when condition changes
+  useEffect(() => {
+    if (!weatherData?.condition) return;
+
+    const key = getAnimationKey(weatherData.condition);
+    const url = WEATHER_ANIMATIONS[key];
+
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => setAnimationData(data))
+      .catch(() => setAnimationData(null));
+  }, [weatherData?.condition]);
+
+  const handleFavorite = () => setFavorite(!favorite);
+  const handleRadarOpen = () => setIsRadarOpen(!isRadarOpen);
+
   return (
     <div
-      className={`rounded-lg p-6 text-center transition-colors duration-300 w-full h-64 flex items-center justify-center ${
-        loading ? "bg-neutral-800" : "bgSmall lg:bgImage bg-cover bg-center"
+      className={`rounded-2xl border border-border p-6 transition-all duration-300 w-full min-h-68 h-fit flex flex-col justify-between relative overflow-hidden ${
+        loading
+          ? "bg-surface/50 animate-pulse"
+          : "bg-surface shadow-md bg-[radial-gradient(ellipse_at_top_right,var(--tw-gradient-stops))] from-primary/10 via-surface to-surface"
       }`}
     >
+
+      {/* Lottie card background */}
+      {!loading && animationData && (
+        <div className="absolute inset-0 z-0 pointer-events-none select-none" aria-hidden="true">
+          <div className="absolute inset-0 bg-surface/75 z-10" />
+          <Lottie
+            animationData={animationData}
+            loop
+            autoplay
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+          />
+        </div>
+      )}
+
       {loading ? (
-        <div className="flex flex-col items-center space-x-1">
-          <span className="flex space-x-1">
-            <span className="animate-bounce [animation-delay:0ms] text-white font-bold text-3xl rounded-full">.</span>
-            <span className="animate-bounce [animation-delay:150ms] text-white font-bold text-3xl rounded-full">.</span>
-            <span className="animate-bounce [animation-delay:300ms] text-white font-bold text-3xl rounded-full">.</span>
-          </span>
-          <span className="text-gray-400 text-sm font-thin">Loading...</span>
+        <div className="flex flex-col justify-between h-full w-full space-y-8">
+          <div className="space-y-2">
+            <div className="h-6 w-32 bg-foreground/10 rounded-lg animate-pulse" />
+            <div className="h-4 w-24 bg-foreground/5 rounded-lg animate-pulse" />
+          </div>
+          <div className="flex justify-between items-end">
+            <div className="h-16 w-20 bg-foreground/10 rounded-xl animate-pulse" />
+            <div className="h-12 w-12 bg-foreground/10 rounded-full animate-pulse" />
+          </div>
+        </div>
+      ) : weatherData ? (
+        <div className="relative z-20 flex flex-col justify-between h-full w-full space-y-4 p-4">
+
+          {/* Top Action Bar */}
+          <div className="flex justify-between items-center">
+            <button
+              title="radar button"
+              type="button"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border text-sm font-medium hover:bg-foreground/5 transition-colors cursor-pointer"
+              onClick={handleRadarOpen}
+            >
+              <RadioIcon className="w-4 h-4 text-foreground" />
+              Radar
+            </button>
+            <button
+              title="favorite button"
+              type="button"
+              className="cursor-pointer p-1.5 hover:bg-foreground/5 rounded-full transition-colors"
+              onClick={handleFavorite}
+            >
+              <Star className={`w-5 h-5 transition-transform active:scale-95 ${favorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`} />
+            </button>
+          </div>
+
+          {/* Bottom Info Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-start w-full mt-auto">
+
+            {/* Left: Location & Advisory */}
+            <div className="md:col-span-3 space-y-3 text-left">
+              <div className="space-y-0.5">
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground line-clamp-1">
+                  {weatherData.city}, {weatherData.country}
+                </h2>
+                <p className="text-xs sm:text-sm font-light tracking-wide text-foreground/60">{formattedDate}</p>
+              </div>
+
+              {/* Advisory Capsule */}
+              <div className="flex items-center gap-2 border-border/60 border bg-foreground/2 rounded-xl p-2 pr-3 max-w-fit">
+                <Image
+                  src={weatherData.icon}
+                  alt={weatherData.description}
+                  width={24}
+                  height={24}
+                  className="object-contain shrink-0"
+                  unoptimized
+                />
+                <p className="text-xs font-medium tracking-tight text-foreground/80 leading-snug">
+                  {weatherData.advisory}
+                </p>
+              </div>
+            </div>
+
+            {/* Right: Temperature */}
+            <div className="md:col-span-2 flex items-center justify-start gap-1">
+              <Image
+                src={weatherData.icon}
+                alt={weatherData.description}
+                width={80}
+                height={80}
+                className="object-contain drop-shadow-lg shrink-0"
+                priority
+                unoptimized
+              />
+              <div className="flex items-start italic select-none">
+                <span className="text-6xl font-extrabold font-display tracking-wider text-foreground">
+                  <AnimatedNumberVanilla value={weatherData.temp} />
+                </span>
+                <span className="text-4xl font-bold mt-1 font-display">°</span>
+              </div>
+            </div>
+
+          </div>
         </div>
       ) : (
-        <div className="flex flex-col justify-center items-center space-y-2">
-          <h2 className="text-2xl font-bold text-white">Today’s Weather</h2>
-          <p className="text-5xl font-bold text-white">24°</p>
-          <span className="text-neutral-300">Sunny</span>
+        /* No data yet state */
+        <div className="flex items-center justify-center h-full min-h-40 text-foreground/40 text-sm">
+          Search for a city or enable location to see weather
+        </div>
+      )}
+
+      {/* Radar Modal */}
+      {isRadarOpen && (
+        <div className="absolute inset-0 bg-surface/95 backdrop-blur-md z-30 p-4 flex flex-col animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-sm font-semibold tracking-wide flex items-center gap-1.5">
+              <RadioIcon className="w-4 h-4 text-primary animate-pulse" /> Live Radar Map
+            </h3>
+            <button
+              title="close radar"
+              type="button"
+              onClick={handleRadarOpen}
+              className="p-1 hover:bg-foreground/10 rounded-full transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="w-full flex-1 bg-foreground/5 rounded-xl border border-border flex items-center justify-center">
+            <p className="text-xs text-muted-foreground">Radar view canvas map goes here</p>
+          </div>
         </div>
       )}
     </div>
-  )
+  );
 }

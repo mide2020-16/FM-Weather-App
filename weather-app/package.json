@@ -5,8 +5,8 @@
   "description": "Frontend Mentors 30 days Hackathon challenge",
   "main": "index.js",
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
@@ -28,7 +28,10 @@
   },
   "dependencies": {
     "axios": "^1.11.0",
+    "lottie-react": "^2.4.1",
+    "lucide-react": "^1.21.0",
     "next": "15.5.2",
+    "next-themes": "^0.4.6",
     "openai": "^5.20.0",
     "react": "19.1.0",
     "react-dom": "19.1.0"
@@ -42,7 +45,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "tailwindcss": "^4.1.13",
-    "typescript": "^5"
+    "typescript": "5.9.3"
   },
   "homepage": "https://github.com/mide2020-16/FM-Weather-App#readme"
 }

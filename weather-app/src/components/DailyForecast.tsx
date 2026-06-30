@@ -1,6 +1,7 @@
 "use client"
 import Image from "next/image"
 import isLoadingProps from "@/types/isLoading"
+import { ChartColumnBig } from "lucide-react"
 
 export default function DailyForecast({ loading }: isLoadingProps) {
   const forecast = [
@@ -14,45 +15,54 @@ export default function DailyForecast({ loading }: isLoadingProps) {
   ]
 
   return (
-    <div className="w-full">
-      <h2 className="mb-4 text-lg font-semibold text-left text-white">Daily Forecast</h2>
+    <div className="w-full flex flex-col space-y-4">
+      <h2 className="text-lg font-bold text-left text-foreground">Daily Forecast</h2>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-6">
-        {loading
-          ? // 🔹 Skeleton loaders when still loading
-            [1, 2, 3, 4, 5, 6, 7].map((_, i) => (
-              <div
-                key={i}
-                className="bg-neutral-800 rounded-xl p-3 text-center animate-pulse"
-              >
-                <div className="h-6 w-12 mx-auto bg-neutral-700 rounded mb-4"></div>
-                <div className="h-16 w-16 mx-auto bg-neutral-700 rounded-full mb-4"></div>
-                <div className="flex justify-between text-sm mt-2">
-                  <div className="h-4 w-6 bg-neutral-700 rounded"></div>
-                  <div className="h-4 w-6 bg-neutral-700 rounded"></div>
+      <div className="flex items-center gap-3 border-border/60 border bg-foreground/[0.02] rounded-xl p-3 max-w-2xl w-full">
+        <ChartColumnBig className="w-5 h-5 text-primary shrink-0" />
+        <p className="text-sm font-medium tracking-tight text-foreground/80 leading-snug">
+          This week&apos;s temperature will be similar to last week. Expect 2.0in more precipitation.
+        </p>
+      </div>
+
+      {/* Forces all 7 days into a single horizontal row with horizontal scroll on smaller viewports */}
+      <div className="w-full overflow-x-auto no-scrollbar pb-2">
+        <div className="grid grid-flow-col auto-cols-[minmax(85px,1fr)] lg:grid-cols-7 gap-3 min-w-162 lg:min-w-0">
+          {loading
+            ? Array.from({ length: forecast.length }).map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-surface rounded-xl p-3 border border-border text-center animate-pulse space-y-3"
+                >
+                  <div className="h-4 w-8 mx-auto bg-foreground/10 rounded" />
+                  <div className="h-10 w-10 mx-auto bg-foreground/10 rounded-full" />
+                  <div className="flex justify-between items-center pt-1">
+                    <div className="h-3 w-4 bg-foreground/10 rounded" />
+                    <div className="h-3 w-4 bg-foreground/10 rounded" />
+                  </div>
                 </div>
-              </div>
-            ))
-          : // 🔹 Real forecast when loaded
-            forecast.map((fc, i) => (
-              <div
-                key={i}
-                className="bg-neutral-800 rounded-xl p-3 text-center"
-              >
-                <p className="font-medium text-lg text-white">{fc.day}</p>
-                <Image
-                  src={`/${fc.icon}`}
-                  width={80}
-                  height={80}
-                  alt={`${fc.day} forecast`}
-                  className="mx-auto my-4"
-                />
-                <div className="flex justify-between text-sm mt-2">
-                  <span className="font-semibold text-white">{fc.high}°</span>
-                  <span className="text-neutral-400">{fc.low}°</span>
+              ))
+            : forecast.map((fc, i) => (
+                <div
+                  key={i}
+                  className="bg-surface border border-border rounded-xl p-3 text-center hover:bg-foreground/[0.01] transition-colors duration-200 flex flex-col justify-between"
+                >
+                  <p className="font-semibold text-xs text-muted-foreground uppercase tracking-wider">{fc.day}</p>
+                  <Image
+                    src={`/${fc.icon}`}
+                    width={40}
+                    height={40}
+                    alt={`${fc.day} forecast icon`}
+                    className="mx-auto my-2 object-contain drop-shadow"
+                    priority
+                  />
+                  <div className="flex justify-between text-xs pt-1 border-t border-border/40 font-medium">
+                    <span className="text-foreground font-bold">{fc.high}°</span>
+                    <span className="text-muted-foreground/60">{fc.low}°</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+        </div>
       </div>
     </div>
   )

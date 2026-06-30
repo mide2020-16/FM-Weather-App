@@ -1,76 +1,134 @@
-import { useUnits } from "@/api/weather-heading/provider/UnitsProvider"
-import Image from "next/image"
-import { useState } from "react"
+"use client";
+
+import { useUnits } from "@/api/provider/UnitsProvider";
+import { Check, LucideChevronDown, SendHorizontal, Settings } from "lucide-react";
+import { useState, useRef } from "react";
+
+// 1. Strictly Type your schema mapping keys
+const UNIT_SECTIONS = [
+  {
+    type: "temperature",
+    label: "Temperature",
+    options: [
+      { key: "celsius", display: "Celsius (°C)" },
+      { key: "fahrenheit", display: "Fahrenheit (°F)" },
+    ],
+  },
+  {
+    type: "wind",
+    label: "Wind Speed",
+    options: [
+      { key: "kmh", display: "km/h" },
+      { key: "mph", display: "mph" },
+    ],
+  },
+  {
+    type: "precipitation",
+    label: "Precipitation",
+    options: [
+      { key: "mm", display: "Millimeters (mm)" },
+      { key: "in", display: "Inches (in)" },
+    ],
+  },
+] as const;
 
 export default function UnitsDropdown() {
-  const [isImperial, setIsImperial] = useState(false)
-  const { units, setUnits } = useUnits()
+  const { units, setUnits } = useUnits();
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+
+  const isCurrentlyImperial = 
+    units.temperature === "fahrenheit" && 
+    units.wind === "mph" && 
+    units.precipitation === "in";
+
+  const handleUnitChange = (type: keyof typeof units, value: string) => {
+    setUnits((prev) => ({ ...prev, [type]: value }));
+  };
+
+  const toggleImperialMetricPreset = () => {
+    if (isCurrentlyImperial) {
+      // Switch all to Metric standard defaults
+      setUnits({ temperature: "celsius", wind: "kmh", precipitation: "mm" });
+    } else {
+      // Switch all to Imperial standard defaults
+      setUnits({ temperature: "fahrenheit", wind: "mph", precipitation: "in" });
+    }
+  };
+
+  const handleUnitSubmit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log("Submitted Units Payload:", units);
+    
+    // Clean, React-approved way to programmatically close a native <details> block
+    if (detailsRef.current) {
+      detailsRef.current.open = false;
+    }
+  };
 
   return (
-    <details className="bg-neutral-800 px-4 py-2 rounded-lg relative focus:border focus:border-gray-400">
-      <summary className="flex gap-2 items-center cursor-pointer">
-        <Image src="/icon-units.svg" width={20} height={20} alt="Units" />
+    <details 
+      ref={detailsRef} 
+      className="bg-surface text-foreground border border-border p-3 rounded-2xl relative transition-all duration-300 group select-none"
+    >
+      <summary className="flex gap-2 items-center cursor-pointer list-none font-medium text-sm outline-none">
+        <Settings className="w-4 h-4 transition-transform duration-300 group-open:rotate-45 text-foreground/70" />
         Units
-        <Image src="/icon-dropdown.svg" width={12} height={12} alt="Dropdown" />
+        <LucideChevronDown className="w-4 h-4 transition-transform duration-200 group-open:rotate-180 text-foreground/70" />
       </summary>
 
-      <div className="absolute right-0 top-10 mt-2 w-60 rounded-md bg-neutral-800 border border-neutral-700 z-10 p-3">
-        <button
-          onClick={() => setIsImperial(!isImperial)}
-          className="font-light cursor-pointer hover:bg-neutral-600 rounded-lg w-full px-2 py-1 text-left text-[18px] mb-1"
-        >
-          Switch to {isImperial ? "Metric" : "Imperial"}
-        </button>
+      {/* Dropdown Menu Container */}
+      <div className="absolute right-0 top-11 mt-2 w-60 rounded-2xl bg-surface border border-border z-50 p-3 shadow-xl">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <button
+            title={`Switch to ${isCurrentlyImperial ? "metric" : "imperial"} presets`}
+            type="button"
+            onClick={toggleImperialMetricPreset}
+            className="font-medium cursor-pointer hover:bg-foreground/5 rounded-xl flex-1 px-3 py-2 text-left text-sm text-primary transition-colors"
+          >
+            Switch to {isCurrentlyImperial ? "Metric" : "Imperial"}
+          </button>
+          
+          <button
+            title="Submit unit changes"
+            type="button"
+            onClick={handleUnitSubmit}
+            className="border border-border p-2 rounded-xl cursor-pointer hover:bg-foreground/5 text-primary transition-colors"
+          >
+            <SendHorizontal className="w-4 h-4" />
+          </button>
+        </div>
 
-        {/* Temperature */}
-        <p className="text-xs mb-1 text-gray-400">Temperature</p>
-        <button
-          onClick={() => setUnits((u) => ({ ...u, temperature: "celsius" }))}
-          className="flex justify-between w-full cursor-pointer hover:bg-neutral-600 focus:bg-neutral-700 rounded-lg px-2 py-1 text-left text-[15px] mb-1"
-        >
-          Celsius (°C) {units.temperature === "celsius" && <Image src="/icon-checkmark.svg" alt="Checkmark" width={12} height={12} />}
-        </button>
-        <button
-          onClick={() => setUnits((u) => ({ ...u, temperature: "fahrenheit" }))}
-          className="flex justify-between w-full cursor-pointer hover:bg-neutral-600 focus:bg-neutral-700 rounded-lg px-2 py-1 text-left text-[15px] mb-1"
-        >
-          Fahrenheit (°F) {units.temperature === "fahrenheit" && <Image src="/icon-checkmark.svg" alt="Checkmark" width={12} height={12} />}
-        </button>
+        {/* Dynamic Schema Rendering */}
+        {UNIT_SECTIONS.map((section, sectionIdx) => (
+          <div key={section.type}>
+            {sectionIdx > 0 && <hr className="my-2 border-border" />}
+            
+            <p className="text-[11px] font-bold tracking-wider uppercase mb-1 px-3 text-foreground/50">
+              {section.label}
+            </p>
 
-        <hr className="my-2 border-neutral-600" />
-
-        {/* Wind */}
-        <p className="text-xs mb-1 text-gray-400">Wind Speed</p>
-        <button
-          onClick={() => setUnits((u) => ({ ...u, wind: "kmh" }))}
-          className="flex justify-between w-full cursor-pointer hover:bg-neutral-600 focus:bg-neutral-700 rounded-lg px-2 py-1 text-left text-[15px] mb-1"
-        >
-          km/h {units.wind === "kmh" && <Image src="/icon-checkmark.svg" alt="Checkmark" width={12} height={12} />}
-        </button>
-        <button
-          onClick={() => setUnits((u) => ({ ...u, wind: "mph" }))}
-          className="flex justify-between w-full cursor-pointer hover:bg-neutral-600 focus:bg-neutral-700 rounded-lg px-2 py-1 text-left text-[15px] mb-1"
-        >
-          mph {units.wind === "mph" && <Image src="/icon-checkmark.svg" alt="Checkmark" width={12} height={12} />}
-        </button>
-
-        <hr className="my-2 border-neutral-600" />
-
-        {/* Precipitation */}
-        <p className="text-xs mb-1 text-gray-400">Precipitation</p>
-        <button
-          onClick={() => setUnits((u) => ({ ...u, precipitation: "mm" }))}
-          className="flex justify-between w-full cursor-pointer hover:bg-neutral-600 focus:bg-neutral-700 rounded-lg px-2 py-1 text-left text-[15px] mb-1"
-        >
-          Millimeters (mm) {units.precipitation === "mm" && <Image src="/icon-checkmark.svg" alt="Checkmark" width={12} height={12} />}
-        </button>
-        <button
-          onClick={() => setUnits((u) => ({ ...u, precipitation: "in" }))}
-          className="flex justify-between w-full cursor-pointer hover:bg-neutral-600 focus:bg-neutral-700 rounded-lg px-2 py-1 text-left text-[15px] mb-1"
-        >
-          Inches (in) {units.precipitation === "in" && <Image src="/icon-checkmark.svg" alt="Checkmark" width={12} height={12} />}
-        </button>
+            {section.options.map((option) => {
+              // Safe assertion mapping against the strong definition types
+              const isActive = units[section.type as keyof typeof units] === option.key;
+              
+              return (
+                <button
+                  key={option.key}
+                  title={`${section.label} selection: ${option.display}`}
+                  type="button"
+                  onClick={() => handleUnitChange(section.type as keyof typeof units, option.key)}
+                  className="flex justify-between items-center w-full cursor-pointer hover:bg-foreground/5 rounded-xl px-3 py-1.5 text-left text-[14px] mb-0.5 transition-colors"
+                >
+                  <span className={isActive ? "font-medium text-foreground" : "text-foreground/80"}>
+                    {option.display}
+                  </span>
+                  {isActive && <Check className="w-4 h-4 text-primary animate-fade-in" />}
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </div>
     </details>
-  )
+  );
 }
