@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, DM_Sans, } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
-import { UnitsProvider } from "@/api/provider/UnitsProvider";
+import { UnitsProvider } from "@/api/weather-heading/provider/UnitsProvider";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
