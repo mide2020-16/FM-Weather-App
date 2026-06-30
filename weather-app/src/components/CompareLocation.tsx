@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import SearchBar from "./SearchBar";
+import SearchBar, { CityData } from "./SearchBar"; // 1. Import CityData from the child component
 import isLoadingProps from "@/types/isLoading";
 
 interface LocationWeatherData {
@@ -23,6 +23,8 @@ interface CityCoords {
   lat: number;
   lon: number;
 }
+
+// 2. Removed duplicate definitions of CityData and SearchBarProps
 
 const SkeletonMetric = () => (
   <div className="flex flex-col gap-1.5 mt-1 items-center justify-center">
@@ -177,7 +179,7 @@ export default function CompareLocation({ loading }: isLoadingProps) {
               Location 1
             </h2>
             <SearchBar
-              onCitySelect={(city) =>
+              onCitySelect={(city: CityData) => // 3. Fixed syntax error here
                 fetchWeather(
                   { lat: city.lat, lon: city.lon },
                   setLocation1Data,
@@ -212,7 +214,7 @@ export default function CompareLocation({ loading }: isLoadingProps) {
               Location 2
             </h2>
             <SearchBar
-              onCitySelect={(city) =>
+              onCitySelect={(city: CityData) => // 3. Fixed syntax error here
                 fetchWeather(
                   { lat: city.lat, lon: city.lon },
                   setLocation2Data,
