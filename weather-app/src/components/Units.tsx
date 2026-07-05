@@ -1,11 +1,18 @@
 "use client";
 
-import { useUnits } from "@/api/provider/UnitsProvider";
-import { Check, LucideChevronDown, SendHorizontal, Settings } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useUnits } from "@/context/provider/UnitsProvider";
+import { Check, ChevronDown, SendHorizontal, Settings } from "lucide-react";
+import { Units } from "@/types/unitsProvider";
 
-// 1. Strictly Type your schema mapping keys
-const UNIT_SECTIONS = [
+type UnitOption<T extends keyof Units> = { key: Units[T]; display: string };
+type UnitSection<T extends keyof Units> = { type: T; label: string; options: UnitOption<T>[] };
+
+const UNIT_SECTIONS: [
+  UnitSection<"temperature">,
+  UnitSection<"wind">,
+  UnitSection<"precipitation">
+] = [
   {
     type: "temperature",
     label: "Temperature",
@@ -30,105 +37,128 @@ const UNIT_SECTIONS = [
       { key: "in", display: "Inches (in)" },
     ],
   },
-] as const;
+];
 
 export default function UnitsDropdown() {
   const { units, setUnits } = useUnits();
-  const detailsRef = useRef<HTMLDetailsElement>(null);
+  
+  const [draftUnits, setDraftUnits] = useState<Units>(units);
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setDraftUnits(units);
+    }
+  }, [isOpen, units]);
 
   const isCurrentlyImperial = 
-    units.temperature === "fahrenheit" && 
-    units.wind === "mph" && 
-    units.precipitation === "in";
+    draftUnits.temperature === "fahrenheit" && 
+    draftUnits.wind === "mph" && 
+    draftUnits.precipitation === "in";
 
-  const handleUnitChange = (type: keyof typeof units, value: string) => {
-    setUnits((prev) => ({ ...prev, [type]: value }));
+  const handleUnitChange = <T extends keyof Units>(type: T, value: Units[T]) => {
+    setDraftUnits((prev) => ({ ...prev, [type]: value }));
   };
 
   const toggleImperialMetricPreset = () => {
     if (isCurrentlyImperial) {
-      // Switch all to Metric standard defaults
-      setUnits({ temperature: "celsius", wind: "kmh", precipitation: "mm" });
+      setDraftUnits({ temperature: "celsius", wind: "kmh", precipitation: "mm" });
     } else {
-      // Switch all to Imperial standard defaults
-      setUnits({ temperature: "fahrenheit", wind: "mph", precipitation: "in" });
+      setDraftUnits({ temperature: "fahrenheit", wind: "mph", precipitation: "in" });
     }
   };
 
   const handleUnitSubmit = (e: React.MouseEvent) => {
     e.preventDefault();
-    console.log("Submitted Units Payload:", units);
-    
-    // Clean, React-approved way to programmatically close a native <details> block
-    if (detailsRef.current) {
-      detailsRef.current.open = false;
-    }
+    setUnits(draftUnits); 
+    setIsOpen(false);
   };
 
-  return (
-    <details 
-      ref={detailsRef} 
-      className="bg-surface text-foreground border border-border p-3 rounded-2xl relative transition-all duration-300 group select-none"
-    >
-      <summary className="flex gap-2 items-center cursor-pointer list-none font-medium text-sm outline-none">
-        <Settings className="w-4 h-4 transition-transform duration-300 group-open:rotate-45 text-foreground/70" />
-        Units
-        <LucideChevronDown className="w-4 h-4 transition-transform duration-200 group-open:rotate-180 text-foreground/70" />
-      </summary>
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-      {/* Dropdown Menu Container */}
-      <div className="absolute right-0 top-11 mt-2 w-60 rounded-2xl bg-surface border border-border z-50 p-3 shadow-xl">
+  return (
+    <div className="relative select-none" ref={dropdownRef}>
+      <button
+        title="units dropdown"
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex gap-2 items-center bg-surface text-foreground border border-border px-4 py-2.5 rounded-2xl font-medium text-sm outline-none hover:bg-foreground/2 transition-colors"
+      >
+        <Settings className={`w-4 h-4 transition-transform duration-300 text-foreground/70 ${isOpen ? 'rotate-45' : ''}`} />
+        Units
+        <ChevronDown className={`w-4 h-4 transition-transform duration-300 text-foreground/70 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {/* Tailwind-powered animated dropdown container */}
+      <div 
+        className={`absolute right-0 top-12 w-60 rounded-2xl bg-surface/90 backdrop-blur-xl border border-border z-50 p-3 shadow-xl origin-top-right transition-all duration-200 ease-out ${
+          isOpen 
+            ? "opacity-100 scale-100 translate-y-0 visible" 
+            : "opacity-0 scale-95 -translate-y-2 invisible"
+        }`}
+      >
         <div className="flex items-center justify-between gap-2 mb-2">
           <button
             title={`Switch to ${isCurrentlyImperial ? "metric" : "imperial"} presets`}
             type="button"
             onClick={toggleImperialMetricPreset}
-            className="font-medium cursor-pointer hover:bg-foreground/5 rounded-xl flex-1 px-3 py-2 text-left text-sm text-primary transition-colors"
+            className="font-medium cursor-pointer hover:bg-foreground/3 rounded-xl flex-1 px-3 py-2 text-left text-sm text-primary transition-colors"
           >
             Switch to {isCurrentlyImperial ? "Metric" : "Imperial"}
           </button>
           
           <button
-            title="Submit unit changes"
+            title="Apply unit changes"
             type="button"
             onClick={handleUnitSubmit}
-            className="border border-border p-2 rounded-xl cursor-pointer hover:bg-foreground/5 text-primary transition-colors"
+            className={`border p-2 rounded-xl cursor-pointer transition-colors ${
+              JSON.stringify(draftUnits) !== JSON.stringify(units)
+                ? "border-primary bg-primary/10 text-primary hover:bg-primary/20" 
+                : "border-border text-primary hover:bg-foreground/3"
+            }`}
           >
             <SendHorizontal className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Dynamic Schema Rendering */}
         {UNIT_SECTIONS.map((section, sectionIdx) => (
           <div key={section.type}>
-            {sectionIdx > 0 && <hr className="my-2 border-border" />}
+            {sectionIdx > 0 && <hr className="my-2 border-border/60" />}
             
-            <p className="text-[11px] font-bold tracking-wider uppercase mb-1 px-3 text-foreground/50">
+            <p className="text-[11px] font-bold tracking-wider uppercase mb-1 px-3 text-foreground/40">
               {section.label}
             </p>
 
             {section.options.map((option) => {
-              // Safe assertion mapping against the strong definition types
-              const isActive = units[section.type as keyof typeof units] === option.key;
+              const isActive = draftUnits[section.type] === option.key;
               
               return (
                 <button
                   key={option.key}
                   title={`${section.label} selection: ${option.display}`}
                   type="button"
-                  onClick={() => handleUnitChange(section.type as keyof typeof units, option.key)}
-                  className="flex justify-between items-center w-full cursor-pointer hover:bg-foreground/5 rounded-xl px-3 py-1.5 text-left text-[14px] mb-0.5 transition-colors"
+                  onClick={() => handleUnitChange(section.type, option.key)}
+                  className="flex justify-between items-center w-full cursor-pointer hover:bg-foreground/3 rounded-xl px-3 py-1.5 text-left text-[14px] mb-0.5 transition-colors"
                 >
                   <span className={isActive ? "font-medium text-foreground" : "text-foreground/80"}>
                     {option.display}
                   </span>
-                  {isActive && <Check className="w-4 h-4 text-primary animate-fade-in" />}
+                  {isActive && <Check className="w-4 h-4 text-primary" />}
                 </button>
               );
             })}
           </div>
         ))}
       </div>
-    </details>
+    </div>
   );
 }

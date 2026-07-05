@@ -2,31 +2,11 @@
 
 import { RadioIcon, Star, X } from "lucide-react";
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import dynamic from "next/dynamic";
+import { useState} from "react";
 import AnimatedNumberVanilla from "./AnimateNumber";
+import WeatherBackground, { WeatherCondition } from "./WeatherBackground";
+import { DailyForecast, HourlyForecast } from "@/app/api/weather-heading/route";
 
-const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
-
-const WEATHER_ANIMATIONS: Record<string, string> = {
-  thunderstorm: "https://assets10.lottiefiles.com/packages/lf20_jm7mv1ib.json",
-  rain:         "https://assets10.lottiefiles.com/packages/lf20_t24tpvcu.json",
-  snow:         "https://assets10.lottiefiles.com/packages/lf20_2cwDXD.json",
-  mist:         "https://assets10.lottiefiles.com/packages/lf20_SkHScC.json",
-  clear:        "https://assets10.lottiefiles.com/packages/lf20_UJNc2t.json",
-  clouds:       "https://assets10.lottiefiles.com/packages/lf20_jpkclziu.json",
-};
-
-function getAnimationKey(condition: string): string {
-  const c = condition.toLowerCase();
-  if (c.includes("thunder")) return "thunderstorm";
-  if (c.includes("drizzle") || c.includes("rain")) return "rain";
-  if (c.includes("snow"))    return "snow";
-  if (c.includes("mist") || c.includes("fog") || c.includes("haze")) return "mist";
-  if (c.includes("clear"))   return "clear";
-  if (c.includes("cloud"))   return "clouds";
-  return "clear";
-}
 
 export interface WeatherData {
   city: string;
@@ -37,19 +17,26 @@ export interface WeatherData {
   feelsLike: number;
   humidity: number;
   windSpeed: number;
+  precipitation: number;
+  visibility: number;
+  pressure: number;
+  dewPoint: number;
   icon: string;
   advisory: string;
+  hourlyForecastByDay: Record<string, HourlyForecast[]>;
+  dailyForecast: DailyForecast[];
 }
 
 interface WeatherCardProps {
   loading: boolean;
   weatherData: WeatherData | null;
+  conditions: WeatherCondition | null;
 }
 
-export default function WeatherCard({ loading, weatherData }: WeatherCardProps) {
+export default function WeatherCard({ loading, weatherData, conditions }: WeatherCardProps) {
   const [favorite, setFavorite] = useState(false);
   const [isRadarOpen, setIsRadarOpen] = useState(false);
-  const [animationData, setAnimationData] = useState<object | null>(null);
+
 
   const formattedDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -57,19 +44,6 @@ export default function WeatherCard({ loading, weatherData }: WeatherCardProps) 
     day: "numeric",
     year: "numeric",
   });
-
-  // Fetch Lottie JSON when condition changes
-  useEffect(() => {
-    if (!weatherData?.condition) return;
-
-    const key = getAnimationKey(weatherData.condition);
-    const url = WEATHER_ANIMATIONS[key];
-
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => setAnimationData(data))
-      .catch(() => setAnimationData(null));
-  }, [weatherData?.condition]);
 
   const handleFavorite = () => setFavorite(!favorite);
   const handleRadarOpen = () => setIsRadarOpen(!isRadarOpen);
@@ -84,15 +58,10 @@ export default function WeatherCard({ loading, weatherData }: WeatherCardProps) 
     >
 
       {/* Lottie card background */}
-      {!loading && animationData && (
+      {!loading && (
         <div className="absolute inset-0 z-0 pointer-events-none select-none" aria-hidden="true">
           <div className="absolute inset-0 bg-surface/75 z-10" />
-          <Lottie
-            animationData={animationData}
-            loop
-            autoplay
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-          />
+          <WeatherBackground condition={conditions} />
         </div>
       )}
 

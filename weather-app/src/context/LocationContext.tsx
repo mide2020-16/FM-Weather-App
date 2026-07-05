@@ -1,18 +1,7 @@
 "use client";
 
+import LocationContextType, { Coordinates } from "@/types/locationContext";
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-
-interface Coordinates {
-  lat: number;
-  lon: number;
-}
-
-interface LocationContextType {
-  coords: Coordinates | null;
-  setCoords: (coords: Coordinates | null) => void;
-  status: "loading" | "prompt" | "granted" | "denied";
-  setStatus: (status: "loading" | "prompt" | "granted" | "denied") => void;
-}
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
 

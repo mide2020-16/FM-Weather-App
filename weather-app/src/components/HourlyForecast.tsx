@@ -1,48 +1,31 @@
 "use client"
-import isLoadingProps from "@/types/isLoading"
+
 import Image from "next/image"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { ChevronDown } from "lucide-react"
+import isLoadingProps from "@/types/isLoading"
+import type { HourlyForecast } from "@/app/api/weather-heading/route"
 
-export default function HourlyForecast({ loading }: isLoadingProps) {
+
+export default function HourlyForecast({ loading, weatherData }: isLoadingProps) {
   const todayName = new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(new Date())
-
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
-  // Initialize selected day to today's actual day name
   const [selectedDay, setSelectedDay] = useState(todayName)
+  const [isVisible, setIsVisible] = useState(true)
   const detailsRef = useRef<HTMLDetailsElement>(null)
 
-  // Mocked 24-hour meteorological data track
-  const hourData = [
-    { icon: "icon-rain.webp", time: "12:00 AM", deg: "16" },
-    { icon: "icon-rain.webp", time: "1:00 AM", deg: "16" },
-    { icon: "icon-fog.webp", time: "2:00 AM", deg: "15" },
-    { icon: "icon-fog.webp", time: "3:00 AM", deg: "15" },
-    { icon: "icon-snow.webp", time: "4:00 AM", deg: "14" },
-    { icon: "icon-snow.webp", time: "5:00 AM", deg: "14" },
-    { icon: "icon-overcast.webp", time: "6:00 AM", deg: "16" },
-    { icon: "icon-overcast.webp", time: "7:00 AM", deg: "17" },
-    { icon: "icon-sunny.webp", time: "8:00 AM", deg: "19" },
-    { icon: "icon-sunny.webp", time: "9:00 AM", deg: "21" },
-    { icon: "icon-sunny.webp", time: "10:00 AM", deg: "23" },
-    { icon: "icon-sunny.webp", time: "11:00 AM", deg: "25" },
-    { icon: "icon-sunny.webp", time: "12:00 PM", deg: "26" },
-    { icon: "icon-sunny.webp", time: "1:00 PM", deg: "27" },
-    { icon: "icon-sunny.webp", time: "2:00 PM", deg: "26" },
-    { icon: "icon-rain.webp", time: "3:00 PM", deg: "20" },
-    { icon: "icon-fog.webp", time: "4:00 PM", deg: "21" },
-    { icon: "icon-snow.webp", time: "5:00 PM", deg: "19" },
-    { icon: "icon-sunny.webp", time: "6:00 PM", deg: "18" },
-    { icon: "icon-overcast.webp", time: "7:00 PM", deg: "17" },
-    { icon: "icon-overcast.webp", time: "8:00 PM", deg: "16" },
-    { icon: "icon-overcast.webp", time: "9:00 PM", deg: "16" },
-    { icon: "icon-fog.webp", time: "10:00 PM", deg: "15" },
-    { icon: "icon-fog.webp", time: "11:00 PM", deg: "15" },
-  ]
+  const activeDayData = weatherData?.hourlyForecastByDay?.[selectedDay] ?? []
 
-  // Automatically close native <details> menu popup when item is selected
+  useEffect(() => {
+    setIsVisible(false)
+    const timer = setTimeout(() => setIsVisible(true), 50)
+    return () => clearTimeout(timer)
+  }, [selectedDay])
+
   const handleDaySelect = (day: string) => {
+    if (day === selectedDay) return
+    
     setSelectedDay(day)
     if (detailsRef.current) {
       detailsRef.current.removeAttribute("open")
@@ -50,7 +33,7 @@ export default function HourlyForecast({ loading }: isLoadingProps) {
   }
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-5 w-full lg:w-85 flex flex-col h-145">
+    <div className="bg-surface border border-border rounded-xl p-5 w-full lg:w-85 flex flex-col h-145 shadow-sm">
       
       {/* Header Context Bar */}
       <div className="flex justify-between items-center mb-5 shrink-0">
@@ -75,7 +58,7 @@ export default function HourlyForecast({ loading }: isLoadingProps) {
                     className={`w-full text-left px-4 py-2.5 text-sm transition-colors font-medium
                       ${isSelected 
                         ? "bg-primary/10 text-primary" 
-                        : "text-foreground/80 hover:bg-foreground/[0.03] hover:text-foreground"
+                        : "text-foreground/80 hover:bg-foreground/3 hover:text-foreground"
                       }`}
                   >
                     {isToday ? "Today" : day}
@@ -87,33 +70,43 @@ export default function HourlyForecast({ loading }: isLoadingProps) {
         </details>
       </div>
 
-      {/* 24-Hour Vertical Micro-Grid Viewport */}
-      <div className="flex-1 overflow-y-auto pr-1 space-y-0.5 custom-scrollbar border border-border/40 rounded-xl bg-foreground/[0.01]">
-        {loading
-          ? Array.from({ length: 8 }).map((_, i) => (
+      {/* 24-Hour Vertical Viewport Container */}
+      <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar border border-border/40 rounded-xl bg-foreground/1">
+        {loading ? (
+          Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="grid grid-cols-3 items-center px-4 py-3.5 animate-pulse border-b border-border/20 last:border-0"
+            >
+              <div className="h-4 w-14 bg-foreground/10 rounded" />
+              <div className="h-7 w-7 bg-foreground/10 rounded-full mx-auto" />
+              <div className="h-4 w-8 bg-foreground/10 rounded ml-auto" />
+            </div>
+          ))
+        ) : activeDayData.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-sm text-muted-foreground p-4 text-center">
+            No forecast data available for this day.
+          </div>
+        ) : (
+          <div 
+            className={`flex flex-col transition-opacity duration-300 ease-in-out ${
+              isVisible ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            {activeDayData.map((hd, i) => (
               <div
-                key={i}
-                className="grid grid-cols-3 items-center px-4 py-3.5 animate-pulse border-b border-border/20 last:border-0"
-              >
-                <div className="h-4 w-14 bg-foreground/10 rounded" />
-                <div className="h-7 w-7 bg-foreground/10 rounded-full mx-auto" />
-                <div className="h-4 w-8 bg-foreground/10 rounded ml-auto" />
-              </div>
-            ))
-          : hourData.map((hd, i) => (
-              <div
-                key={i}
-                className="grid grid-cols-3 items-center px-4 py-3.5 text-sm border-b border-border/30 last:border-0 hover:bg-foreground/[0.01] transition-colors"
+                key={`${selectedDay}-${hd.time}-${i}`}
+                className="grid grid-cols-3 items-center px-4 py-3.5 text-sm border-b border-border/30 last:border-0 hover:bg-foreground/2 transition-colors"
               >
                 {/* 1. Time Marker */}
                 <span className="font-semibold text-muted-foreground/90 text-left tracking-tight">
                   {hd.time}
                 </span>
 
-                {/* 2. Condition Icon Anchor */}
+                {/* 2. Condition Icon */}
                 <div className="flex justify-center">
                   <Image
-                    src={`/${hd.icon}`}
+                    src={`${hd.icon}`}
                     width={28}
                     height={28}
                     alt="Hourly conditions"
@@ -122,12 +115,14 @@ export default function HourlyForecast({ loading }: isLoadingProps) {
                   />
                 </div>
 
-                {/* 3. Metric Readout */}
+                {/* 3. Temperature Metric */}
                 <span className="font-bold text-foreground text-right tracking-tight">
-                  {hd.deg}°
+                  {Math.round(hd.temp || 0)}°
                 </span>
               </div>
             ))}
+          </div>
+        )}
       </div>
     </div>
   )

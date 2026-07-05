@@ -4,24 +4,28 @@ import isLoadingProps from "@/types/isLoading"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useState } from "react"
 
-export default function Conditions({ loading }: isLoadingProps) {
+export default function Conditions({ loading, weatherData }: isLoadingProps) {
   const [currentPage, setCurrentPage] = useState(0);
 
+  // 1. Safely parse and format metrics to avoid undefined runtime errors
+  const visibilityInKm = weatherData?.visibility 
+    ? (weatherData.visibility / 1000).toFixed(1) 
+    : "--";
+
   const baseConditions = [
-    { condition: "Feels Like", data: "18°" },
-    { condition: "Humidity", data: "46%" },
-    { condition: "Wind", data: "14 km/h" },
-    { condition: "Precipitation", data: "0 mm" },
-    { condition: "Feels Like (Alt)", data: "20°" }, // renamed slightly just to visualize page changes clearly
-    { condition: "Humidity (Alt)", data: "50%" },
-    { condition: "Wind (Alt)", data: "12 km/h" },
-    { condition: "Precipitation (Alt)", data: "1 mm" },
+    { condition: "Feels Like", data: `${weatherData?.feelsLike ?? "--"}°` },
+    { condition: "Humidity", data: `${weatherData?.humidity ?? "--"}%` },
+    { condition: "Wind", data: `${weatherData?.windSpeed ?? "--"} km/h` },
+    { condition: "Precipitation", data: `${weatherData?.precipitation ?? "--"}` },
+    { condition: "Visibility", data: `${visibilityInKm} km` },
+    { condition: "Pressure", data: `${weatherData?.pressure ?? "--"} hPa`},
+    { condition: "Dew Point", data: `${weatherData?.dewPoint ?? "--"}°` },
+    { condition: "Dew Point", data: `${weatherData?.dewPoint ?? "--"}°` },
   ];
 
   const ITEMS_PER_PAGE = 4;
   const totalPages = Math.ceil(baseConditions.length / ITEMS_PER_PAGE);
 
-  // Get current chunk of 4 items based on page state
   const displayedConditions = baseConditions.slice(
     currentPage * ITEMS_PER_PAGE,
     (currentPage + 1) * ITEMS_PER_PAGE

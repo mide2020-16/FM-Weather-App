@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Bricolage_Grotesque, DM_Sans } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
-import { UnitsProvider } from "@/api/provider/UnitsProvider";
+import { UnitsProvider } from "@/context/provider/UnitsProvider";
 import ThemeProvider from "@/components/ThemeProvider";
 import { MapPin, ShieldAlert, Navigation } from "lucide-react";
 import { LocationProvider } from "@/context/LocationContext";
@@ -22,8 +22,6 @@ const bricolage = Bricolage_Grotesque({
   variable: "--font-bricolage",
 });
 
-// Map OpenWeatherMap condition codes to animation names
-// Full list: https://openweathermap.org/weather-conditions
 type WeatherCondition = "sunny" | "rainy" | "cloudy" | "stormy" | "snowy" | "foggy" | "night" | null;
 
 function mapConditionCode(code: number, isDay: boolean): WeatherCondition {
@@ -108,7 +106,7 @@ export default function RootLayout({
         console.error(error);
         setLocationStatus("denied");
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: false, timeout: 10000 }
     );
   };
 

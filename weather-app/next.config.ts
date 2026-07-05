@@ -8,11 +8,16 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'flagcdn.com',
-        pathname: '/**', // Matches all nested image sub-paths
+        pathname: '/**',
       },
       {
         protocol: 'https',
         hostname: 'api.openweathermap.org',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'openweathermap.org',
         pathname: '/**',
       },
       {

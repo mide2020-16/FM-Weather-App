@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 // Dynamically import to avoid SSR issues with lottie-react
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
@@ -18,6 +18,7 @@ export type WeatherCondition =
 
 interface WeatherBackgroundProps {
   condition: WeatherCondition;
+  children?: ReactNode;
 }
 
 // Map conditions to theme overlay colors — keeps your theme intact
@@ -31,7 +32,7 @@ const conditionStyles: Record<NonNullable<WeatherCondition>, { overlay: string; 
   night:  { overlay: "bg-indigo-500/5", tint: "dark:bg-indigo-900/10"},
 };
 
-export default function WeatherBackground({ condition }: WeatherBackgroundProps) {
+export default function WeatherBackground({ condition, children }: WeatherBackgroundProps) {
   const [animationData, setAnimationData] = useState<object | null>(null);
 
   useEffect(() => {
@@ -70,7 +71,9 @@ export default function WeatherBackground({ condition }: WeatherBackgroundProps)
         rendererSettings={{
           preserveAspectRatio: "xMidYMid slice", // fills the whole screen
         }}
-      />
+      >
+        {children}
+      </Lottie>
     </div>
   );
 }

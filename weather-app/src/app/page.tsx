@@ -12,33 +12,41 @@ import HourlyForecast from "@/components/HourlyForecast";
 import SearchBar from "@/components/SearchBar";
 import WeatherCard, { WeatherData } from "@/components/WeatherCard";
 import WeatherHeading from "@/components/WeatherHeading";
+import { useUnits } from "@/context/provider/UnitsProvider";
 
 export default function Home() {
   const { coords } = useLocation();
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [bgCondition, setBgCondition] = useState<WeatherCondition>(null);
+  const {isCurrentlyImperial } = useUnits();
 
   useEffect(() => {
     if (!coords) return;
 
     setLoading(true);
-
-    fetch(`/api/weather-heading?lat=${coords.lat}&lon=${coords.lon}`)
+    const unit = isCurrentlyImperial ? "metric" : "imperial"
+    fetch(`/api/weather-heading?lat=${coords.lat}&lon=${coords.lon}&units=${unit}`)
       .then((res) => res.json())
       .then((data) => {
         if (!data.error) {
           setWeatherData({
-            city:        data.city,
-            country:     data.country,
-            condition:   data.condition,
-            description: data.description,
-            temp:        data.temp,
-            feelsLike:   data.feelsLike,
-            humidity:    data.humidity,
-            windSpeed:   data.windSpeed,
-            icon:        data.icon,
-            advisory:    data.advisory,
+            city:          data.city,
+            country:       data.country,
+            condition:     data.condition,
+            description:   data.description,
+            temp:          data.temp,
+            feelsLike:     data.feelsLike,
+            humidity:      data.humidity,
+            windSpeed:     data.windSpeed,
+            visibility:    data.visibility,
+            pressure:      data.pressure,
+            dewPoint:      data.dewPoint,
+            precipitation: data.precipitation ?? 0,
+            icon:          data.icon,
+            advisory:      data.advisory,
+            hourlyForecastByDay: data.hourlyForecastByDay,
+            dailyForecast: data.dailyForecast,
           });
 
           // Map real condition + icon code to background animation
@@ -74,20 +82,20 @@ export default function Home() {
 
           {/* Main */}
           <div className="lg:col-span-7 flex flex-col gap-6">
-            <WeatherCard loading={loading} weatherData={weatherData} />
-            <Conditons loading={loading} />
-            <DailyForecast loading={loading} />
+            <WeatherCard loading={loading} weatherData={weatherData} conditions={bgCondition} />
+            <Conditons loading={loading} weatherData={weatherData}  />
+            <DailyForecast loading={loading} weatherData={weatherData} />
           </div>
 
           {/* Hourly */}
           <div className="lg:col-span-3 h-full">
-            <HourlyForecast loading={loading} />
+            <HourlyForecast loading={loading} weatherData={weatherData} />
           </div>
         </div>
 
         <hr className="w-full border-border/60 my-4" />
 
-        <CompareLocation loading={loading} />
+        <CompareLocation loading={loading} weatherData={weatherData}/>
       </div>
     </>
   );

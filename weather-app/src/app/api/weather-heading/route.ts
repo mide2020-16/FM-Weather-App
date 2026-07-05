@@ -1,13 +1,28 @@
+import { OpenWeather25Response } from "@/types/weather";
 import { NextResponse } from "next/server";
 
-interface OpenWeatherResponse {
-  name: string;
-  sys: { country: string };
-  main: { temp: number; feels_like: number; humidity: number };
-  weather: { main: string; description: string; icon: string }[];
-  wind: { speed: number };
+export interface OpenWeatherForecastResponse {
+  list: {
+    dt: number;
+    main: { temp: number };
+    weather: { main: string; description: string; icon: string }[];
+  }[];
 }
-
+export interface HourlyForecast { 
+  time: string; 
+  temp: number; 
+  condition: string; 
+  icon: string;
+}
+export interface DailyForecast {
+  day: string;
+  date: string;
+  tempMin: number;
+  tempMax: number;
+  condition: string;
+  description: string;
+  icon: string;
+}
 function generateHeading(condition: string, temp: number): string {
   const c = condition.toLowerCase();
   const t = Math.round(temp);
@@ -40,13 +55,23 @@ function getAdvisory(condition: string, temp: number): string {
   return "Mild conditions — a comfortable day overall.";
 }
 
+function calculateDewPoint(temp: number, humidity: number): number {
+  const a = 17.27;
+  const b = 237.7;
+  const alpha = ((a * temp) / (b + temp)) + Math.log(humidity / 100);
+  const dewPoint = (b * alpha) / (a - alpha);
+  return Math.round(dewPoint);
+}
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const lat = searchParams.get("lat");
     const lon = searchParams.get("lon");
+    const unit = searchParams.get("units");
+    console.log(unit)
 
-    if (!lat || !lon) {
+    if (!lat || !lon || !unit) {
       return NextResponse.json({ error: "lat and lon are required" }, { status: 400 });
     }
 
@@ -55,27 +80,110 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "API key missing" }, { status: 500 });
     }
 
-    const res = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
-    );
+    // 1. Parallel fetching setup to avoid waterfalls
+    const [res, fres] = await Promise.all([
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=${unit}`),
+      fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=${unit}`)
+    ]);
 
     if (!res.ok) {
-      return NextResponse.json({ error: "Weather fetch failed" }, { status: res.status });
+      return NextResponse.json({ error: "Current weather fetch failed" }, { status: res.status });
+    }
+    if (!fres.ok) {
+      return NextResponse.json({ error: "Forecast weather fetch failed" }, { status: fres.status });
     }
 
-    const data: OpenWeatherResponse = await res.json();
+    const data: OpenWeather25Response = await res.json();
+    const fdata: OpenWeatherForecastResponse = await fres.json();
 
-    const condition    = data.weather[0].main;
-    const description  = data.weather[0].description;
-    const temp         = data.main.temp;
-    const feelsLike    = data.main.feels_like;
-    const humidity     = data.main.humidity;
-    const windSpeed    = data.wind.speed;
-    const city         = data.name;
-    const country      = data.sys.country;
-    const icon         = data.weather[0].icon;
-    const heading      = generateHeading(condition, temp);
-    const advisory     = getAdvisory(condition, temp);
+    // 2. Initialize the structured day container matching frontend needs
+    const hourlyForecastByDay: Record<string, HourlyForecast[]> = {
+      Monday: [],
+      Tuesday: [],
+      Wednesday: [],
+      Thursday: [],
+      Friday: [],
+      Saturday: [],
+      Sunday: [],
+    };
+
+    const dailyAccumulator: Record<string, {
+      temps: number[];
+      dayName: string;
+      dateLabel: string;
+      middayItem: OpenWeatherForecastResponse["list"][number];
+    }> = {};
+
+    fdata.list.forEach((item) => {
+      const date = new Date(item.dt * 1000);
+      const dayName = new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
+      const dateKey = date.toISOString().split("T")[0];
+      const hours = date.getHours();
+
+      const formattedTime = date.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        hour12: true,
+      });
+
+      if (hourlyForecastByDay[dayName]) {
+        hourlyForecastByDay[dayName].push({
+          time: formattedTime,
+          temp: Math.round(item.main.temp),
+          condition: item.weather[0].description,
+          icon: `https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`,
+        });
+      }
+
+      if (!dailyAccumulator[dateKey]) {
+        dailyAccumulator[dateKey] = {
+          temps: [],
+          dayName,
+          dateLabel: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          middayItem: item
+        };
+      }
+
+      dailyAccumulator[dateKey].temps.push(item.main.temp);
+
+      if (hours >= 12 && hours <= 15) {
+        dailyAccumulator[dateKey].middayItem = item;
+      }
+    });
+
+    const dailyForecast = Object.keys(dailyAccumulator)
+      .sort() // Ensure sequential execution ordering
+      .map((dateKey) => {
+        const entry = dailyAccumulator[dateKey];
+        const minTemp = Math.round(Math.min(...entry.temps));
+        const maxTemp = Math.round(Math.max(...entry.temps));
+        const representativeWeather = entry.middayItem.weather[0];
+
+        return {
+          day: entry.dayName,
+          date: entry.dateLabel,
+          tempMin: minTemp,
+          tempMax: maxTemp,
+          condition: representativeWeather.main,
+          description: generateDailyDescription(representativeWeather.main, maxTemp),
+          icon: `https://openweathermap.org/img/wn/${representativeWeather.icon}@2x.png`
+        };
+      });
+
+    // 4. Extract current context stats
+    const condition   = data.weather[0].main;
+    const description = data.weather[0].description;
+    const temp        = data.main.temp;
+    const feelsLike   = data.main.feels_like;
+    const humidity    = data.main.humidity;
+    const pressure    = data.main.pressure;    
+    const visibility  = data.visibility;        
+    const windSpeed   = data.wind.speed;
+    const dewPoint    = calculateDewPoint(temp, humidity);
+    const city        = data.name;
+    const country     = data.sys.country;
+    const icon        = data.weather[0].icon;
+    const heading     = generateHeading(condition, temp);
+    const advisory    = getAdvisory(condition, temp);
 
     return NextResponse.json({
       heading,
@@ -85,10 +193,15 @@ export async function GET(req: Request) {
       temp: Math.round(temp),
       feelsLike: Math.round(feelsLike),
       humidity,
+      pressure,
+      visibility,
       windSpeed,
+      dewPoint,
       city,
       country,
-      icon: `https://openweathermap.org/img/wn/${icon}@2x.png`,
+      hourlyForecastByDay,
+      dailyForecast,
+      icon: `https://openweathermap.org/img/wn/${icon}.png`,
     });
   } catch (error) {
     console.error("Weather heading API error:", error);
@@ -97,4 +210,24 @@ export async function GET(req: Request) {
       { status: 500 }
     );
   }
+}
+
+function generateDailyDescription(main: string, maxTemp: number): string {
+  const m = main.toLowerCase();
+  const t = Math.round(maxTemp);
+
+  if (m.includes("thunder")) return "Scattered thunderstorms possible — expect brief heavy showers.";
+  if (m.includes("drizzle")) return "Light drizzle likely — surfaces may be a bit damp.";
+  if (m.includes("rain")) return "Periods of rain expected — plan for wet conditions.";
+  if (m.includes("snow")) return "Snow showers possible — colder temperatures and slippery spots.";
+  if (m.includes("mist") || m.includes("fog")) return "Mist or fog likely — limited visibility in places.";
+  if (m.includes("clear") && t > 30) return "Hot and sunny — high UV, stay hydrated and use sunscreen.";
+  if (m.includes("clear") && t > 20) return "Sunny and warm — great for outdoor activities.";
+  if (m.includes("clear")) return "Mostly clear skies — pleasant conditions expected.";
+  if (m.includes("cloud")) return "Cloudy with mild temperatures — a calm day overall.";
+
+  if (t > 30) return "Very warm day — expect heat and plan accordingly.";
+  if (t < 5) return "Cold day ahead — bundle up and protect exposed skin.";
+
+  return "Mixed conditions — check hourly details for timing and intensity.";
 }

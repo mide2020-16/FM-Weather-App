@@ -2,7 +2,7 @@ import { type WeatherCondition } from "@/components/WeatherBackground";
 
 export function mapToWeatherCondition(
   condition: string | null | undefined,
-  icon?: string // OpenWeatherMap icon code e.g. "01n" — "n" suffix = night
+  icon?: string
 ): WeatherCondition {
   if (!condition) return null;
 

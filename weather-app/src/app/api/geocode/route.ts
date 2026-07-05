@@ -36,7 +36,7 @@ export async function GET(req: Request) {
       );
     }
 
-    const geocodeUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=5&appid=${apiKey}`;
+    const geocodeUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=10&appid=${apiKey}`;
     
     const res = await fetch(geocodeUrl);
 

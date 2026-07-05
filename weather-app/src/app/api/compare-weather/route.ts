@@ -20,8 +20,9 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const lat = searchParams.get("lat");
     const lon = searchParams.get("lon");
+    const unit = searchParams.get("units");
 
-    if (!lat || !lon) {
+    if (!lat || !lon || !unit) {
       return NextResponse.json({ error: "lat and lon are required" }, { status: 400 });
     }
 
@@ -31,7 +32,7 @@ export async function GET(req: Request) {
     }
 
     const res = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
+      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=${unit}`
     );
 
     if (!res.ok) {

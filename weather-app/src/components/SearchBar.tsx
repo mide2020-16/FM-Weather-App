@@ -52,6 +52,7 @@ export default function SearchBar({ onCitySelect }: SearchBarProps) {
 
       try {
         setIsLoading(true);
+
         const res = await fetch(`/api/geocode?city=${encodeURIComponent(cleanSearch)}`);
         if (res.ok) {
           const data = await res.json();

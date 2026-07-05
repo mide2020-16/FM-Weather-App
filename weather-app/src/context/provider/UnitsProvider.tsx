@@ -1,17 +1,9 @@
 "use client"
 
+import { Units, UnitsContextType } from "@/types/unitsProvider"
 import { createContext, useContext, useEffect, useState, ReactNode } from "react"
 
-type Units = {
-  temperature: "celsius" | "fahrenheit"
-  wind: "kmh" | "mph"
-  precipitation: "mm" | "in"
-}
 
-type UnitsContextType = {
-  units: Units
-  setUnits: React.Dispatch<React.SetStateAction<Units>>
-}
 
 const UnitsContext = createContext<UnitsContextType | undefined>(undefined)
 

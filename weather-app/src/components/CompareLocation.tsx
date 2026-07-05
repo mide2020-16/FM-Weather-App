@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import SearchBar, { CityData } from "./SearchBar"; // 1. Import CityData from the child component
 import isLoadingProps from "@/types/isLoading";
+import { useUnits } from "@/context/provider/UnitsProvider";
 
 interface LocationWeatherData {
   city: string;
@@ -137,6 +138,7 @@ export default function CompareLocation({ loading }: isLoadingProps) {
   const [location2Data, setLocation2Data] = useState<LocationWeatherData | null>(null);
   const [loadingLoc1, setLoadingLoc1] = useState(false);
   const [loadingLoc2, setLoadingLoc2] = useState(false);
+  const {isCurrentlyImperial } = useUnits();
 
   const fetchWeather = async (
     coords: CityCoords,
@@ -144,9 +146,10 @@ export default function CompareLocation({ loading }: isLoadingProps) {
     setFetching: (v: boolean) => void
   ) => {
     setFetching(true);
+    const unit = isCurrentlyImperial ? "metric" : "imperial"
     try {
       const res = await fetch(
-        `/api/compare-weather?lat=${coords.lat}&lon=${coords.lon}`
+        `/api/compare-weather?lat=${coords.lat}&lon=${coords.lon}&units=${unit}`
       );
       const data = await res.json();
       if (!data.error) setter(data as LocationWeatherData);
