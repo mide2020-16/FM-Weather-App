@@ -1,6 +1,6 @@
-import { WeatherData } from "@/components/WeatherCard";
+import { WeatherData } from "./componentTypes";
 
 export default interface isLoadingProps {
   loading: boolean;
-  weatherData: WeatherData | null;
+  weatherData: WeatherData| null;
 }
