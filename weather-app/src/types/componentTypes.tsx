@@ -1,5 +1,6 @@
-import { DailyForecast, HourlyForecast } from "@/app/api/weather-heading/route";
+
 import { ReactNode } from "react";
+import { DailyForecast, HourlyForecast } from "./weather";
 
 export interface WeatherData {
   city: string;
@@ -19,14 +20,26 @@ export interface WeatherData {
   hourlyForecastByDay: Record<string, HourlyForecast[]>;
   dailyForecast: DailyForecast[];
 }
+export interface FavoriteDataProps {
+  id: string;
+  city?: string;
+  country?: string | null;
+  lat: number;
+  lon: number;
+}
 
+export interface FavoriteProps {
+  favData: FavoriteDataProps[];
+}
 
 export interface WeatherCardProps {
   loading: boolean;
   weatherData: WeatherData | null;
   conditions: WeatherCondition | null;
+  favData: FavoriteDataProps[];
+  onToggle: (d: FavoriteDataProps) => void;
+  coords: { lat: number; lon: number } | null;
 }
-
 export type WeatherCondition =
   | "sunny"
   | "rainy"

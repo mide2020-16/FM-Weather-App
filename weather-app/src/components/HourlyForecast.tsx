@@ -4,8 +4,12 @@ import Image from "next/image"
 import { useState, useRef, useEffect } from "react"
 import { ChevronDown } from "lucide-react"
 import isLoadingProps from "@/types/isLoading"
-import type { HourlyForecast } from "@/app/api/weather-heading/route"
 
+type HourlyData = {
+  time: string
+  icon: string
+  temp?: number | null
+}
 
 export default function HourlyForecast({ loading, weatherData }: isLoadingProps) {
   const todayName = new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(new Date())
@@ -15,7 +19,7 @@ export default function HourlyForecast({ loading, weatherData }: isLoadingProps)
   const [isVisible, setIsVisible] = useState(true)
   const detailsRef = useRef<HTMLDetailsElement>(null)
 
-  const activeDayData = weatherData?.hourlyForecastByDay?.[selectedDay] ?? []
+  const activeDayData: HourlyData[] = weatherData?.hourlyForecastByDay?.[selectedDay] ?? []
 
   useEffect(() => {
     setIsVisible(false)

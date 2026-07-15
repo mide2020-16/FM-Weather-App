@@ -5,15 +5,15 @@ import Image from "next/image";
 import { useState} from "react";
 import AnimatedNumberVanilla from "./AnimateNumber";
 import WeatherBackground from "./WeatherBackground";
-import { WeatherCardProps } from "@/types/componentTypes";
+import { FavoriteDataProps, WeatherCardProps } from "@/types/componentTypes";
+import dynamic from "next/dynamic";
 
 
+export default function WeatherCard({ loading, weatherData, conditions, onToggle, favData, coords}: WeatherCardProps) {
 
+  const RadarMap = dynamic(() => import("./RadarMap"), { ssr: false });
 
-export default function WeatherCard({ loading, weatherData, conditions }: WeatherCardProps) {
-  const [favorite, setFavorite] = useState(false);
   const [isRadarOpen, setIsRadarOpen] = useState(false);
-
 
   const formattedDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -21,8 +21,18 @@ export default function WeatherCard({ loading, weatherData, conditions }: Weathe
     day: "numeric",
     year: "numeric",
   });
+  const data: FavoriteDataProps = {
+    id: `${weatherData?.city}-${weatherData?.country}`,
+    city: weatherData?.city,
+    country: weatherData?.country,
+    lat: coords?.lat ?? 0,
+    lon: coords?.lon ?? 0,
+  };
 
-  const handleFavorite = () => setFavorite(!favorite);
+const favorite = favData.some((f) => f.id === `${weatherData?.city}-${weatherData?.country}`);
+  const handleFavorite = () => {
+    onToggle(data)
+  };
   const handleRadarOpen = () => setIsRadarOpen(!isRadarOpen);
 
   return (
@@ -149,8 +159,14 @@ export default function WeatherCard({ loading, weatherData, conditions }: Weathe
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div className="w-full flex-1 bg-foreground/5 rounded-xl border border-border flex items-center justify-center">
-            <p className="text-xs text-muted-foreground">Radar view canvas map goes here</p>
+          <div className="w-full flex-1 rounded-xl border border-border overflow-hidden">
+            {coords ? (
+              <RadarMap lat={coords.lat} lon={coords.lon} />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                No location selected
+              </div>
+            )}
           </div>
         </div>
       )}

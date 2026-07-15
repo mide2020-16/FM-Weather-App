@@ -1,4 +1,4 @@
-import { type WeatherCondition } from "@/components/WeatherBackground";
+import { WeatherCondition } from "@/types/componentTypes";
 
 export function mapToWeatherCondition(
   condition: string | null | undefined,

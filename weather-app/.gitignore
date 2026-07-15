@@ -13,10 +13,10 @@
 yarn.debug.log*
 yarn.error.log*
 npm-debug.log*
+package-lock.json
 
 # testing
 /coverage
-
 # next.js
 /.next/
 /out/

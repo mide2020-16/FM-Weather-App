@@ -12,8 +12,9 @@ import SearchBar from "@/components/SearchBar";
 import WeatherCard from "@/components/WeatherCard";
 import WeatherHeading from "@/components/WeatherHeading";
 import { useUnits } from "@/context/provider/UnitsProvider";
-import { WeatherCondition, WeatherData } from "@/types/componentTypes";
+import { FavoriteDataProps, WeatherCondition, WeatherData } from "@/types/componentTypes";
 import Favorite from "@/components/Favorite";
+import { useLocalStorage } from "@/lib/favoriteLocalStorageHook";
 
 export default function Home() {
   const { coords } = useLocation();
@@ -21,6 +22,19 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [bgCondition, setBgCondition] = useState<WeatherCondition>(null);
   const {isCurrentlyImperial } = useUnits();
+  const [favData, setFavData] = useLocalStorage<FavoriteDataProps[]>("favoriteCities", []);
+
+  const handleFavoriteDataToggle = (data: FavoriteDataProps) => {
+    setFavData((prevData) => {
+      const exists = prevData.some((prev) => prev.id === data.id);
+
+      if (exists) {
+        return prevData.filter((prev) => prev.id !== data.id);
+      } else {
+        return [...prevData, data];
+      }
+    });
+  };
 
   useEffect(() => {
     if (!coords) return;
@@ -75,11 +89,11 @@ export default function Home() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-6xl my-6">
 
-          <Favorite />
+          <Favorite favData={favData} />
 
           {/* Main */}
           <div className="lg:col-span-7 flex flex-col gap-6">
-            <WeatherCard loading={loading} weatherData={weatherData} conditions={bgCondition} />
+            <WeatherCard loading={loading} weatherData={weatherData} conditions={bgCondition} onToggle={handleFavoriteDataToggle} favData={favData} coords={coords}/>
             <Conditons loading={loading} weatherData={weatherData}  />
             <DailyForecast loading={loading} weatherData={weatherData} />
           </div>

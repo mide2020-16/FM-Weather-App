@@ -11,7 +11,6 @@ import { UnitsContextType } from "@/types/unitsProvider";
 export default function DailyForecast({ loading, weatherData }: isLoadingProps) {
   const forecast = weatherData?.dailyForecast ?? [];
   const {units}: UnitsContextType = useUnits();
-  console.log(units)
   const weeklySummary = forecast.length > 0 
     ? forecast[0].description 
     : "Checking the latest atmospheric conditions for this week.";
