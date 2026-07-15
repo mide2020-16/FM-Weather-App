@@ -4,34 +4,11 @@ import { RadioIcon, Star, X } from "lucide-react";
 import Image from "next/image";
 import { useState} from "react";
 import AnimatedNumberVanilla from "./AnimateNumber";
-import WeatherBackground, { WeatherCondition } from "./WeatherBackground";
-import { DailyForecast, HourlyForecast } from "@/app/api/weather-heading/route";
+import WeatherBackground from "./WeatherBackground";
+import { WeatherCardProps } from "@/types/componentTypes";
 
 
-export interface WeatherData {
-  city: string;
-  country: string;
-  condition: string;
-  description: string;
-  temp: number;
-  feelsLike: number;
-  humidity: number;
-  windSpeed: number;
-  precipitation: number;
-  visibility: number;
-  pressure: number;
-  dewPoint: number;
-  icon: string;
-  advisory: string;
-  hourlyForecastByDay: Record<string, HourlyForecast[]>;
-  dailyForecast: DailyForecast[];
-}
 
-interface WeatherCardProps {
-  loading: boolean;
-  weatherData: WeatherData | null;
-  conditions: WeatherCondition | null;
-}
 
 export default function WeatherCard({ loading, weatherData, conditions }: WeatherCardProps) {
   const [favorite, setFavorite] = useState(false);

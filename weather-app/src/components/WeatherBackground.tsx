@@ -1,27 +1,12 @@
 "use client";
 
+import { WeatherBackgroundProps, WeatherCondition } from "@/types/componentTypes";
 import dynamic from "next/dynamic";
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 // Dynamically import to avoid SSR issues with lottie-react
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
-export type WeatherCondition =
-  | "sunny"
-  | "rainy"
-  | "cloudy"
-  | "stormy"
-  | "snowy"
-  | "foggy"
-  | "night"
-  | null;
-
-interface WeatherBackgroundProps {
-  condition: WeatherCondition;
-  children?: ReactNode;
-}
-
-// Map conditions to theme overlay colors — keeps your theme intact
 const conditionStyles: Record<NonNullable<WeatherCondition>, { overlay: string; tint: string }> = {
   sunny:  { overlay: "bg-amber-500/5",  tint: "dark:bg-amber-900/10" },
   rainy:  { overlay: "bg-blue-500/5",   tint: "dark:bg-blue-900/10"  },

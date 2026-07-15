@@ -106,3 +106,58 @@ export interface OpenWeather25Response {
   /** Internal parameter */
   cod: number;
 }
+
+
+export interface OpenWeatherResponse {
+  name: string;
+  sys: { country: string };
+  main: {
+    temp: number;
+    feels_like: number;
+    humidity: number;
+    temp_min: number;
+    temp_max: number;
+  };
+  weather: { main: string; description: string; icon: string }[];
+  wind: { speed: number };
+  visibility: number;
+}
+
+export interface OpenWeatherGeocodeItem {
+  name: string;
+  lat: number;
+  lon: number;
+  country: string;
+  state?: string;
+}
+
+export interface FormattedCityData {
+  name: string;
+  lat: number;
+  lon: number;
+  countryCode: string;
+  state: string;
+}
+
+export interface OpenWeatherForecastResponse {
+  list: {
+    dt: number;
+    main: { temp: number };
+    weather: { main: string; description: string; icon: string }[];
+  }[];
+}
+export interface HourlyForecast { 
+  time: string; 
+  temp: number; 
+  condition: string; 
+  icon: string;
+}
+export interface DailyForecast {
+  day: string;
+  date: string;
+  tempMin: number;
+  tempMax: number;
+  condition: string;
+  description: string;
+  icon: string;
+}

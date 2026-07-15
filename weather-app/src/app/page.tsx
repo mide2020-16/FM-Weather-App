@@ -3,16 +3,17 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "@/context/LocationContext";
 import { mapToWeatherCondition } from "@/lib/mapCondition";
-import { type WeatherCondition } from "@/components/WeatherBackground";
 import WeatherBackground from "@/components/WeatherBackground";
 import CompareLocation from "@/components/CompareLocation";
 import Conditons from "@/components/Condition";
 import DailyForecast from "@/components/DailyForecast";
 import HourlyForecast from "@/components/HourlyForecast";
 import SearchBar from "@/components/SearchBar";
-import WeatherCard, { WeatherData } from "@/components/WeatherCard";
+import WeatherCard from "@/components/WeatherCard";
 import WeatherHeading from "@/components/WeatherHeading";
 import { useUnits } from "@/context/provider/UnitsProvider";
+import { WeatherCondition, WeatherData } from "@/types/componentTypes";
+import Favorite from "@/components/Favorite";
 
 export default function Home() {
   const { coords } = useLocation();
@@ -60,25 +61,21 @@ export default function Home() {
         setBgCondition(null);
       })
       .finally(() => setLoading(false));
-  }, [coords]);
+  }, [coords, isCurrentlyImperial]);
 
   return (
     <>
       {/* Full-page weather background — driven by real condition */}
       <WeatherBackground condition={bgCondition} />
 
-      {/* All page content sits above the background */}
-      <div className="relative z-10 flex flex-col items-center w-full px-4 md:px-8 mt-10 text-foreground">
+      <div className="relative z-50 flex flex-col items-center w-full px-4 md:px-8 mt-10 text-foreground">
 
         <WeatherHeading />
         <SearchBar />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-6xl my-6">
 
-          {/* Favorites */}
-          <div className="lg:col-span-2 h-fit bg-surface p-4 rounded-xl border border-border">
-            <p className="font-semibold mb-2">Favorites</p>
-          </div>
+          <Favorite />
 
           {/* Main */}
           <div className="lg:col-span-7 flex flex-col gap-6">

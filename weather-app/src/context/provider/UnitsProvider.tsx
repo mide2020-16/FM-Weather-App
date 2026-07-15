@@ -1,9 +1,7 @@
 "use client"
 
-import { Units, UnitsContextType } from "@/types/unitsProvider"
 import { createContext, useContext, useEffect, useState, ReactNode } from "react"
-
-
+import { Units, UnitsContextType } from "@/types/unitsProvider"
 
 const UnitsContext = createContext<UnitsContextType | undefined>(undefined)
 
@@ -14,31 +12,36 @@ export function UnitsProvider({ children }: { children: ReactNode }) {
     precipitation: "mm",
   })
 
-  // Load from localStorage on mount
+  // 🟢 Derived state: Automatically calculates true/false based on current selections
+  const isCurrentlyImperial = 
+    units.temperature === "fahrenheit" && 
+    units.wind === "mph" && 
+    units.precipitation === "in"
+
   useEffect(() => {
     const stored = localStorage.getItem("weather-units")
     if (stored) {
       try {
-        setUnits(JSON.parse(stored))
+        const parsed = JSON.parse(stored)
+        setUnits(parsed)
       } catch {
         console.warn("Invalid units in localStorage")
       }
     }
   }, [])
 
-  // Save to localStorage whenever units change
   useEffect(() => {
     localStorage.setItem("weather-units", JSON.stringify(units))
-  }, [units])
+    document.cookie = `isImperial=${isCurrentlyImperial}; path=/; max-age=31536000`
+  }, [units, isCurrentlyImperial])
 
   return (
-    <UnitsContext.Provider value={{ units, setUnits }}>
+    <UnitsContext.Provider value={{ units, setUnits, isCurrentlyImperial }}>
       {children}
     </UnitsContext.Provider>
   )
 }
 
-// 🔥 Custom hook for convenience
 export function useUnits() {
   const context = useContext(UnitsContext)
   if (!context) {

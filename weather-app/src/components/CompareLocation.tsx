@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import SearchBar, { CityData } from "./SearchBar"; // 1. Import CityData from the child component
+import SearchBar from "./SearchBar"; // 1. Import CityData from the child component
 import isLoadingProps from "@/types/isLoading";
 import { useUnits } from "@/context/provider/UnitsProvider";
+import { CityData } from "@/types/componentTypes";
 
 interface LocationWeatherData {
   city: string;
@@ -40,9 +41,9 @@ const SkeletonCard = () => (
       <div className="h-7 w-48 bg-muted rounded animate-pulse" />
       <div className="h-5 w-32 bg-muted/60 rounded animate-pulse mt-2" />
     </div>
-    <div className="bg-foreground/[0.02] border border-border/40 rounded-xl p-5 flex flex-col items-center justify-center">
+    <div className="bg-foreground/2 border border-border/40 rounded-xl p-5 flex flex-col items-center justify-center">
       <div className="flex items-center gap-5 justify-center py-3 w-full">
-        <div className="w-[64px] h-[64px] bg-muted rounded-full animate-pulse shrink-0" />
+        <div className="w-16 h-16 bg-muted rounded-full animate-pulse shrink-0" />
         <div className="h-16 w-24 bg-muted/80 rounded-xl animate-pulse" />
       </div>
       <hr className="w-full border-border/20 my-4" />
@@ -75,7 +76,7 @@ const WeatherCardDisplay = ({ data, formattedDate }: WeatherCardDisplayProps) =>
       <p className="text-xs sm:text-sm text-muted-foreground/60 mt-0.5 font-medium">{formattedDate}</p>
     </div>
 
-    <div className="bg-foreground/[0.02] border border-border/40 rounded-xl p-5 flex flex-col items-center justify-center">
+    <div className="bg-foreground/2 border border-border/40 rounded-xl p-5 flex flex-col items-center justify-center">
       <div className="flex items-center gap-5 justify-center py-3">
         <Image
           alt={data.conditionText}
@@ -182,7 +183,7 @@ export default function CompareLocation({ loading }: isLoadingProps) {
               Location 1
             </h2>
             <SearchBar
-              onCitySelect={(city: CityData) => // 3. Fixed syntax error here
+              onCitySelect={(city: CityData) =>
                 fetchWeather(
                   { lat: city.lat, lon: city.lon },
                   setLocation1Data,

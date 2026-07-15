@@ -1,19 +1,5 @@
+import { OpenWeatherResponse } from "@/types/weather";
 import { NextResponse } from "next/server";
-
-interface OpenWeatherResponse {
-  name: string;
-  sys: { country: string };
-  main: {
-    temp: number;
-    feels_like: number;
-    humidity: number;
-    temp_min: number;
-    temp_max: number;
-  };
-  weather: { main: string; description: string; icon: string }[];
-  wind: { speed: number };
-  visibility: number;
-}
 
 export async function GET(req: Request) {
   try {

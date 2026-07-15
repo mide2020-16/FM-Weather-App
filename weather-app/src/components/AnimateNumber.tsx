@@ -1,11 +1,9 @@
 "use client";
 
+import { AnimatedNumberProps } from "@/types/componentTypes";
 import { useEffect, useState } from "react";
 
-interface AnimatedNumberProps {
-  value: number;
-  duration?: number; // duration in milliseconds
-}
+
 
 export default function AnimatedNumberVanilla({ value, duration = 1500 }: AnimatedNumberProps) {
   const [count, setCount] = useState(0);

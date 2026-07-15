@@ -1,20 +1,5 @@
+import { FormattedCityData, OpenWeatherGeocodeItem } from "@/types/weather";
 import { NextResponse } from "next/server";
-
-interface OpenWeatherGeocodeItem {
-  name: string;
-  lat: number;
-  lon: number;
-  country: string;
-  state?: string;
-}
-
-interface FormattedCityData {
-  name: string;
-  lat: number;
-  lon: number;
-  countryCode: string;
-  state: string;
-}
 
 export async function GET(req: Request) {
   try {

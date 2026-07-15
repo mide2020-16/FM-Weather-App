@@ -4,20 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { SearchIcon, X, LocateFixed } from "lucide-react";
 import Image from "next/image";
 import { useLocation } from "@/context/LocationContext";
+import { CityData, SearchBarProps } from "@/types/componentTypes";
 
-// 1. Exported and renamed to PascalCase for TS conventions
-export interface CityData {
-  name: string;
-  countryCode: string;
-  country: string;
-  state?: string;
-  lat: number;
-  lon: number;
-}
-
-export interface SearchBarProps {
-  onCitySelect?: (city: CityData) => void;
-}
 
 export default function SearchBar({ onCitySelect }: SearchBarProps) {
   const { setCoords } = useLocation();
@@ -148,7 +136,7 @@ export default function SearchBar({ onCitySelect }: SearchBarProps) {
           {!onCitySelect && (
             <li
               onClick={handleCurrentLocation}
-              className="px-3.5 py-2.5 text-sm text-foreground hover:bg-foreground/[0.04] cursor-pointer rounded-xl transition-colors duration-150"
+              className="px-3.5 py-2.5 text-sm text-foreground hover:bg-foreground/4 cursor-pointer rounded-xl transition-colors duration-150"
             >
               <div className="flex items-center gap-3">
                 <div className="w-5 h-4 flex items-center justify-center shrink-0">
@@ -174,7 +162,7 @@ export default function SearchBar({ onCitySelect }: SearchBarProps) {
             <li
               key={`${city.name}-${city.countryCode}-${city.lat}-${city.lon}`}
               onClick={() => handleSelectCity(city)}
-              className="px-3.5 py-2.5 text-sm text-foreground hover:bg-foreground/[0.04] cursor-pointer rounded-xl transition-colors duration-150"
+              className="px-3.5 py-2.5 text-sm text-foreground hover:bg-foreground/4 cursor-pointer rounded-xl transition-colors duration-150"
             >
               <div className="flex items-center gap-3">
                 <div className="w-5 h-4 relative overflow-hidden rounded-xs bg-muted shrink-0 shadow-sm">

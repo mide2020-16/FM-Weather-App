@@ -1,28 +1,6 @@
-import { OpenWeather25Response } from "@/types/weather";
+import { HourlyForecast, OpenWeather25Response, OpenWeatherForecastResponse } from "@/types/weather";
 import { NextResponse } from "next/server";
 
-export interface OpenWeatherForecastResponse {
-  list: {
-    dt: number;
-    main: { temp: number };
-    weather: { main: string; description: string; icon: string }[];
-  }[];
-}
-export interface HourlyForecast { 
-  time: string; 
-  temp: number; 
-  condition: string; 
-  icon: string;
-}
-export interface DailyForecast {
-  day: string;
-  date: string;
-  tempMin: number;
-  tempMax: number;
-  condition: string;
-  description: string;
-  icon: string;
-}
 function generateHeading(condition: string, temp: number): string {
   const c = condition.toLowerCase();
   const t = Math.round(temp);

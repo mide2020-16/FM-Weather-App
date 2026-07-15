@@ -52,7 +52,7 @@ export default function DailyForecast({ loading, weatherData }: isLoadingProps) 
               Forecast data is currently unavailable.
             </div>
           ) : (
-            forecast.map((fc, i) => {
+            forecast.map((fc: typeof forecast[number], i: number) => {
               const shortDay = fc.day === "Today" ? "Tdy" : fc.day.substring(0, 3);
               const displayMax = formatTemp(fc.tempMax, units.temperature);
               const displayMin = formatTemp(fc.tempMin, units.temperature);
